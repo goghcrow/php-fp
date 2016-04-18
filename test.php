@@ -108,6 +108,7 @@ namespace xiaofeng
     assert(Fn\_parameterCount("\\array_map", false) === 2);
     assert(Fn\_parameterCount("test\\c::sm", false) === 2);
 
+    // curry
     ///////////////////////////////////////////////////////////////////////////
     function _testSum($sumFn) {
         $add1 = $sumFn(1);
@@ -139,19 +140,58 @@ namespace xiaofeng
     $add100 = $add(100);
     assert($add100(1) === 101);
 
+    // compose
+    ///////////////////////////////////////////////////////////////////////////
+    $add = Fn\op("+");
+    $oneParaAdd = Fn\onePara($add);
+    assert($add(1, 2) === $oneParaAdd([1, 2]));
 
-//    $filter = Fn\curry(Fn\flip("\\array_filter"), 0);
-//    $map = Fn\curry("\\array_map");
-//    $reduce = Fn\curry(Fn\flip("\\array_reduce"), 0);
-//    $range = Fn\curry("\\range", 1);
+    $strlenAdd1 = Fn\compose1(Fn\op("+", 1), "strlen");
+    assert($strlenAdd1("hello") === strlen("hello") + 1);
 
-//    Fn\compose($reduce(Fn\op("+")), $map("chr"), $filter(), $range(10));
+    // curryp
+    ///////////////////////////////////////////////////////////////////////////
+    $isEven = function($a) { return ($a & 1) === 0; };
 
-//    array_filter()
-//    array_map()
+    $getEven = Fn\_curryp1("array_filter", Fn\_(), $isEven);
+    assert($getEven(range(1, 10)) === [1=>2,3=>4,5=>6,7=>8,9=>10]);
 
+    $charAt0 = Fn\_curryp1("\\substr", Fn\_(), 0, 1);
+    assert($charAt0("HELLO") === "H");
+
+    $p = Fn\_();
+    assert(Fn\_satisfyArgs([$p], 2) === false);
+    assert(Fn\_satisfyArgs([$p, 1], 2) === false);
+    assert(Fn\_satisfyArgs([1, $p], 2) === false);
+    assert(Fn\_satisfyArgs([$p, 1, 1], 2) === false);
+    assert(Fn\_satisfyArgs([1, $p, 1], 2) === false);
+
+    assert(Fn\_satisfyArgs([1, 1, $p], 2) === false);
+    assert(Fn\_satisfyArgs([1, 1, $p, 1], 2) === false);
+    assert(Fn\_satisfyArgs([1, 1, $p, $p], 2) === false);
+
+    assert(Fn\_satisfyArgs([1,1], 2) === true);
+    assert(Fn\_satisfyArgs([1,1,1], 2) === true);
+
+    $getEven = Fn\curryp("\\array_filter", Fn\_(), $isEven);
+    assert($getEven(range(1, 10)) === [1=>2,3=>4,5=>6,7=>8,9=>10]);
+
+    $charAt0 = Fn\curryp("\\substr", Fn\_(), 0, 1);
+    assert($charAt0("Hello") === "H");
+
+    $filter = Fn\curryp("\\array_filter", Fn\_(), Fn\_());
+    $getEven = $filter(Fn\_(), $isEven);
+    assert($getEven(range(1, 10)) === [1=>2,3=>4,5=>6,7=>8,9=>10]);
+
+    $removeFirstChar = Fn\curryp("\\substr", Fn\_(), 1);
+    assert($removeFirstChar("Hello") === "ello");
+
+    // 可选参数curry
+    $removeFirstChar = Fn\curryp("\\substr", Fn\_(), 1, Fn\_());
+    $substrFrom1Len2 = $removeFirstChar(Fn\_(), 2);
+    assert($substrFrom1Len2("Hello") === "el");
+
+    
     ///////////////////////////////////////////////////////////////////////////
 
-//    $strlenA1 = Fn\compose(Fn\op("+", 1), "\\strlen");
-//    assert($strlenA1("Hello"), 6);
 }
