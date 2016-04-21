@@ -1,6 +1,6 @@
 <?php
 /**
- * User: 乌鸦
+ * User: xiaofeng
  * Date: 2016/4/16
  * Time: 2:24
  */
@@ -13,6 +13,25 @@ namespace test
     }
 
     function f($a, $b = null) {}
+
+    interface M
+    {
+        public function say($msg);
+    }
+
+    class C1 implements M
+    {
+        public function say($msg) {
+            return __CLASS__ . ":" . $msg;
+        }
+    }
+
+    class C2 implements M
+    {
+        public function say($msg) {
+            return __CLASS__ . ":" . $msg;
+        }
+    }
 }
 
 namespace xiaofeng
@@ -23,6 +42,10 @@ namespace xiaofeng
     use xiaofeng\F\Fn as Fn;
     use test;
 
+    ini_set("zend.assertions", 1);
+    ini_set("assert.exception", 1);
+
+    // class_alias for simplify usage of namespace
 
     // Fn\op
     ///////////////////////////////////////////////////////////////////////////
@@ -67,6 +90,25 @@ namespace xiaofeng
     $table = [["name"=>"xiaofeng1", "age"=>26], ["name"=>"xiaofeng2", "age"=>26]];
     $secondName = Fn\op("...[]", [1, "name"]);
     assert($secondName($table) === "xiaofeng2");
+
+    $say = Fn\op("::", "say");
+    $sayHello = $say("hello");
+    assert($sayHello(new test\C1) === "test\\C1:hello");
+    assert($sayHello(new test\C2) === "test\\C2:hello");
+    // \ReflectionFunction::export($say);
+    $c1SaySth = $say(Fn\_(), new test\C1);
+    $c2SaySth = $say(Fn\_(), new test\C2);
+    assert($c1SaySth("bye~") === "test\\C1:bye~");
+    assert($c2SaySth("bye!") === "test\\C2:bye!");
+
+
+    $ifelse = Fn\op("if");
+    assert($ifelse(true, 1, 2) === 1);
+    assert($ifelse(false, 1, 2) === 2);
+
+    $if = Fn\op("if", Fn\_(), ":-D", "%>_<%");
+    assert($if(true) === ":-D");
+    assert($if(false) === "%>_<%");
 
     // Fn\not curry not
     ///////////////////////////////////////////////////////////////////////////
@@ -136,18 +178,44 @@ namespace xiaofeng
     $add1 = Fn\curry("xiaofeng\\sumFn", 1);
     assert($add1(10) === 11);
 
-    $add  = Fn\_curry1(function($a, $b) { return $a + $b; });
+    $add  = Fn\curry1(function($a, $b) { return $a + $b; });
     $add100 = $add(100);
     assert($add100(1) === 101);
 
     // compose
     ///////////////////////////////////////////////////////////////////////////
     $add = Fn\op("+");
-    $oneParaAdd = Fn\onePara($add);
+    $oneParaAdd = Fn\arrayfyArgs($add);
     assert($add(1, 2) === $oneParaAdd([1, 2]));
 
     $strlenAdd1 = Fn\compose1(Fn\op("+", 1), "strlen");
     assert($strlenAdd1("hello") === strlen("hello") + 1);
+
+    $strlenAdd1 = Fn\compose(Fn\op("+", 1), "strlen");
+    assert($strlenAdd1("hello") === strlen("hello") + 1);
+
+    $persons = [["name"=>"xiaofeng1"],["name"=>"xiaofeng2"],["name"=>"foo"],["name"=>"bar"]];
+    $sum = Fn\curryp("\\array_reduce", Fn\_(), Fn\op("+"), 0);
+    $removeOdd = Fn\curryp("\\array_filter", Fn\_(), Fn\where('$iter > 3'));
+    $getName = Fn\curry("\\array_map", Fn\op("[]", "name"));
+    $f = Fn\compose($sum, $removeOdd, Fn\mapf("\\strlen"), $getName);
+    assert($f($persons) === 18);
+    $f = Fn\pipe($getName, Fn\mapf("\\strlen"), $removeOdd, $sum);
+    assert($f($persons) === 18);
+
+    $strncasecmpArray = Fn\curryp("\\strncasecmp", "array", Fn\_(), strlen("array"));
+    $startWithArray = Fn\compose1(Fn\op("===", 0), $strncasecmpArray);
+    $getArrayFunc = Fn\curryp("\\array_filter", Fn\_(), $startWithArray);
+    $f = Fn\compose1("\\print_r", $getArrayFunc);
+    $f = Fn\pipe1($getArrayFunc, "\\print_r");
+    // print all internal array functions
+    // $f(get_defined_functions()["internal"]);
+
+    // where
+    ///////////////////////////////////////////////////////////////////////////
+    $isEven = Fn\where('$iter % 2 === 0');
+    assert($isEven(2) === true);
+    assert($isEven(3) === false);
 
     // curryp
     ///////////////////////////////////////////////////////////////////////////
@@ -186,12 +254,11 @@ namespace xiaofeng
     $removeFirstChar = Fn\curryp("\\substr", Fn\_(), 1);
     assert($removeFirstChar("Hello") === "ello");
 
-    // 可选参数curry
+    // curry optional parameter
     $removeFirstChar = Fn\curryp("\\substr", Fn\_(), 1, Fn\_());
     $substrFrom1Len2 = $removeFirstChar(Fn\_(), 2);
     assert($substrFrom1Len2("Hello") === "el");
 
-    
     ///////////////////////////////////////////////////////////////////////////
 
 }
