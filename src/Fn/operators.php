@@ -4,7 +4,11 @@
  * Date: 2016/4/17
  * Time: 18:35
  */
-namespace xiaofeng\F\Fn;
+namespace xiaofeng\fp\fn;
+
+//const not = __NAMESPACE__ . "not";
+//const where = __NAMESPACE__ . "where";
+//const mapf = __NAMESPACE__ . "mapf";
 
 /**
  * 生成常见operator的柯里化闭包，或直接执行op

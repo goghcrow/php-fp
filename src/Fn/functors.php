@@ -7,8 +7,8 @@
 
 // TODO: 拆分整理
 
-namespace xiaofeng\F;
-use xiaofeng\F\Fn as Fn;
+namespace xiaofeng\fp;
+use xiaofeng\fp\fn as fn;
 
 interface Functor
 {
@@ -31,7 +31,7 @@ abstract class AbstractFunctor implements Functor
 class Just extends AbstractFunctor
 {
     public function __invoke(/*callable*/ $f) {
-        Fn\_assertCallable($f, "First argument");
+        fn\_assertCallable($f, "First argument");
         return static::of($f($this->__value));
     }
 }
@@ -39,7 +39,7 @@ class Just extends AbstractFunctor
 class Collection extends AbstractFunctor
 {
     public function __invoke(/*callable*/ $f) {
-        Fn\_assertCallable($f, "First argument");
+        fn\_assertCallable($f, "First argument");
 
     }
 }

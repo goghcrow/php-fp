@@ -4,11 +4,17 @@
  * Date: 2016/4/17
  * Time: 18:34
  */
-namespace xiaofeng\F\Fn;
+namespace xiaofeng\fp\fn;
 
 /**
- * placeholder
- *      a longer string, more expensive
+ * placeholder version 2
+ * a longer string, more expensive
+ */
+const __ = __LINE__ . '$$' . __FILE__; // . '$$' .__NAMESPACE__;
+
+/**
+ * placeholder func version 1
+ * @deprecated
  * @return string
  */
 function _() {
@@ -70,17 +76,13 @@ function curry(/*$f, ...$args*/) {
 }
 
 /**
- * curry once supporting placeholder Fn\_()
- * @internal
- * @access private
+ * curry once supporting placeholder __
  * @param callable|string $f
  * @param $ ...array $args
  * @return \Closure|mixed
  * @throws \InvalidArgumentException
  */
-function _curryp1(/*$f, ...$args*/) {
-    $placeHolder = _();
-
+function curryp1(/*$f, ...$args*/) {
     $args = func_get_args();
     $f = array_shift($args);
     _assertCallable($f, "First arguments");
@@ -90,10 +92,10 @@ function _curryp1(/*$f, ...$args*/) {
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    return function(/*...$leftArgs*/) use($f, $args, $placeHolder) {
+    return function(/*...$leftArgs*/) use($f, $args) {
         $leftArgs = func_get_args();
         foreach($args as &$arg) {
-            if($arg === $placeHolder) {
+            if($arg === __) {
                 $arg = array_shift($leftArgs);
             }
         }
@@ -110,12 +112,11 @@ function _curryp1(/*$f, ...$args*/) {
  * @return bool
  */
 function _satisfyArgs(array $allArgs, $requiredCount) {
-    $placeHolder = _();
     if(count($allArgs) < $requiredCount) {
         return false;
     }
     foreach($allArgs as $index => $arg) {
-        if($arg === $placeHolder) {
+        if($arg === __) {
             return false;
         }
     }
@@ -133,21 +134,20 @@ function _satisfyArgs(array $allArgs, $requiredCount) {
  * @throws \InvalidArgumentException
  */
 function _curryp($f, array $allArgs, $requiredCount) {
-    $placeHolder = _();
     _assertCallable($f, "First arguments");
 
     /**
      * @param ...array $args
      * @return \Closure|mixed
      */
-    return function(/*...$args*/) use($f, $allArgs, $requiredCount, $placeHolder) {
+    return function(/*...$args*/) use($f, $allArgs, $requiredCount) {
         $args = func_get_args();
         if(($left = count($args)) === 0) {
             return _curryp($f, $allArgs, $requiredCount);
         }
 
         foreach($allArgs as $index => &$arg) {
-            if($arg === $placeHolder) {
+            if($arg === __) {
                 $arg = array_shift($args);
                 $left--;
                 if($left <= 0) {
@@ -170,7 +170,7 @@ function _curryp($f, array $allArgs, $requiredCount) {
 }
 
 /**
- * curry supporting placeholder _()
+ * curry supporting placeholder __
  * @param callable|string $f
  * @param $ ...array $args
  * @return \Closure|mixed
@@ -188,7 +188,7 @@ function curryp(/*$f, ...$args*/) {
     $requiredCount = _parameterCount($f, true);
     $left = $requiredCount - count($args);
     if($left > 0) {
-        $args = array_merge($args, array_fill(0, $left, _()));
+        $args = array_merge($args, array_fill(0, $left, _));
     }
     return _curryp($f, $args, $requiredCount);
 }

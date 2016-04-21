@@ -4,8 +4,7 @@
  * Date: 2016/4/16
  * Time: 1:05
  */
-namespace xiaofeng\F\Fn;
-use xiaofeng\F;
+namespace xiaofeng\fp\fn;
 
 /**
  * @param callable|string $f

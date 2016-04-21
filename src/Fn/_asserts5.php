@@ -4,7 +4,7 @@
  * Date: 2016/4/17
  * Time: 18:31
  */
-namespace xiaofeng\F\Fn;
+namespace xiaofeng\fp\fn;
 
 // http://php.net/manual/en/function.assert.php#function.assert.expectations
 ini_set("zend.assertions", 1);
@@ -18,7 +18,9 @@ ini_set("assert.exception", 1);
  * @throws \InvalidArgumentException
  */
 function _assertCallable($var, $what) {
-    assert(is_callable($var), new \InvalidArgumentException("$what should be callable"));
+    if(!is_callable($var)) {
+        throw new \InvalidArgumentException("$what should be callable");
+    }
 }
 
 /**
@@ -41,7 +43,9 @@ function _assertAllCallables(array $vars) {
  * @throws \InvalidArgumentException
  */
 function _assertIsArrayOrObject($var, $what) {
-    assert(is_array($var) || is_object($var), new \InvalidArgumentException("$what should be array or object"));
+    if(!is_array($var) && !is_object($var)) {
+        throw new \InvalidArgumentException("$what should be array or object");
+    }
 }
 
 /**
@@ -52,7 +56,9 @@ function _assertIsArrayOrObject($var, $what) {
  * @throws \InvalidArgumentException
  */
 function _assertNotEmpty($var, $what) {
-    assert(!empty($var), new \InvalidArgumentException("$what should be not empty"));
+    if(empty($var)) {
+        throw new \InvalidArgumentException("$what should be not empty");
+    }
 }
 
 /**
@@ -63,7 +69,9 @@ function _assertNotEmpty($var, $what) {
  * @throws \InvalidArgumentException
  */
 function _assertIsString($var, $what) {
-    assert(is_string($var), new \InvalidArgumentException("$what should be string"));
+    if(!is_string($var)) {
+        throw new \InvalidArgumentException("$what should be string");
+    }
 }
 
 /**
@@ -74,7 +82,9 @@ function _assertIsString($var, $what) {
  * @throws \InvalidArgumentException
  */
 function _assertIsObject($var, $what) {
-    assert(is_object($var), new \InvalidArgumentException("$what should be objecct"));
+    if(!is_object($var)) {
+        throw new \InvalidArgumentException("$what should be objecct");
+    }
 }
 
 /**
@@ -87,5 +97,7 @@ function _assertIsObject($var, $what) {
 function _assertMethodExist($obj, $method) {
     _assertIsString($method, "Second Argument");
     _assertIsObject($obj, "First Argument");
-    assert(method_exists($obj, $method), new \InvalidArgumentException("$method do not exist"));
+    if(!method_exists($obj, $method)) {
+        throw new \InvalidArgumentException("$method do not exist");
+    }
 }

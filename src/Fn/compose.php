@@ -4,7 +4,7 @@
  * Date: 2016/4/17
  * Time: 18:38
  */
-namespace xiaofeng\F\Fn;
+namespace xiaofeng\fp\fn;
 
 /**
  * convert a callable accepting multiple parameters
