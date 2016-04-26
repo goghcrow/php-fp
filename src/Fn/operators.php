@@ -10,6 +10,11 @@ namespace xiaofeng\fp\fn;
 //const where = __NAMESPACE__ . "where";
 //const mapf = __NAMESPACE__ . "mapf";
 
+// for exmaple
+// const lt = __NAMESPACE__ . "lt"; // string callable
+// function lt($a, $b) { return op("<"); }
+
+
 /**
  * 生成常见operator的柯里化闭包，或直接执行op
  * op函数本身至少接受一个参数，op名称，剩余参数支持curry,支持占位符

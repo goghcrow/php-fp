@@ -4,15 +4,21 @@
  * Date: 2016/4/16
  * Time: 2:24
  */
-namespace test
-{
+namespace test {
     class C
     {
-        public function m($a, $b = null) {}
-        public static function sm($a, $b = null) {}
+        public function m($a, $b = null)
+        {
+        }
+
+        public static function sm($a, $b = null)
+        {
+        }
     }
 
-    function f($a, $b = null) {}
+    function f($a, $b = null)
+    {
+    }
 
     interface M
     {
@@ -21,15 +27,24 @@ namespace test
 
     class C1 implements M
     {
-        public function say($msg) {
+        public function say($msg)
+        {
             return __CLASS__ . ":" . $msg;
         }
     }
 
     class C2 implements M
     {
-        public function say($msg) {
+        public function say($msg)
+        {
             return __CLASS__ . ":" . $msg;
+        }
+    }
+
+    class Func
+    {
+        public function __invoke($first, $second) {
+            echo __CLASS__;
         }
     }
 }
@@ -53,7 +68,39 @@ namespace xiaofeng
     ini_set("zend.assertions", 1);
     ini_set("assert.exception", 1);
 
-    // class_alias for simplify usage of namespace
+    // test-callable
+    ///////////////////////////////////////////////////////////////////////////
+    // language struct is not callable
+    assert(is_callable("isset") === false);
+    assert(is_callable("empty") === false);
+
+    // build-in func
+    assert(is_callable("strlen"));
+    assert(is_callable("\\strlen"));
+
+    // user-defined func
+    assert(is_callable("test\\f"));
+    assert(is_callable("f") === false);
+
+    // non-static method
+    assert(is_callable([new test\c, "m"]));
+
+    // static method
+    assert(is_callable([new test\c, "sm"]));
+    assert(is_callable(["test\\c", "sm"]));
+    assert(is_callable("test\\c::sm"));
+
+    // non-std
+    assert(is_callable(["test\\c", "sm"]));
+    assert(is_callable("test\\c::m"));
+
+    // \Closure
+    assert((function(){}) instanceof \Closure);
+    assert(is_callable(function(){}));
+
+    // object implements __invoke
+    assert(new test\Func);
+
 
     // fn\op
     ///////////////////////////////////////////////////////////////////////////
@@ -157,6 +204,8 @@ namespace xiaofeng
     assert(fn\_parameterCount(function($a, $b = null) {}, false) === 2);
     assert(fn\_parameterCount("\\array_map", false) === 2);
     assert(fn\_parameterCount("test\\c::sm", false) === 2);
+
+    assert(fn\_parameterCount(new test\Func) === 2);
 
     // curry
     ///////////////////////////////////////////////////////////////////////////

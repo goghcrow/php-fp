@@ -220,8 +220,11 @@ function _parameterCount($f, $required = true) {
         return $required ?
             $refm->getNumberOfRequiredParameters() : $refm->getNumberOfParameters();
     }
-    if(is_object($f) && ($f instanceof \Closure)) {
-        $refm = (new \ReflectionObject($f))->getMethod("__invoke");
+    if(is_object($f)) {
+        // is_callable && is_object
+        // 1. $f instanceof \Closure
+        // 2. $f implements __invoke
+        $refm = (new \ReflectionObject((object)$f))->getMethod("__invoke");
         return $required ?
             $refm->getNumberOfRequiredParameters() : $refm->getNumberOfParameters();
     }
